@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PET Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container" id="userInfo">Henter brugerdata...</div>
+
+<script>
+const fragment = new URLSearchParams(window.location.hash.slice(1));
+const accessToken = fragment.get("access_token");
+
+if (!accessToken) {
+    window.location.href = "index.html";
+} else {
+    fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${accessToken}` }
+    })
+    .then(res => res.json())
+    .then(user => {
+        // Spørg bot API om rolle
+        fetch(`https://DIN_BOT_URL/checkrole?userId=${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.hasRole){
+                document.getElementById("userInfo").innerHTML = `
+                    <h2>Velkommen, ${user.username}#${user.discriminator}</h2>
+                    <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" width="100" style="border-radius:50%">
+                    <p>Rank: ${data.rank}</p>
+                    <button onclick="logout()">Log ud</button>
+                `;
+            } else {
+                window.location.href = "noaccess.html";
+            }
+        });
+    });
+}
+
+function logout(){
+    window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
