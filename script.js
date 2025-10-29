@@ -1,4 +1,4 @@
-const clientId = "DIN_CLIENT_ID_HER"; // Discord app
+const clientId = "1433054522170802342"; // Discord app
 const redirectUri = "https://alfredsoll.github.io/pet/dashboard.html";
 
 document.getElementById("loginBtn").addEventListener("click", () => {
