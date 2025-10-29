@@ -1,5 +1,5 @@
 const clientId = "DIN_CLIENT_ID_HER"; // Discord app
-const redirectUri = "https://DIT_GITHUB_BRUGERNAVN.github.io/pet-dashboard/dashboard.html";
+const redirectUri = "https://alfredsoll.github.io/pet/dashboard.html";
 
 document.getElementById("loginBtn").addEventListener("click", () => {
     const scope = "identify guilds";
