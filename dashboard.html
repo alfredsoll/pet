@@ -22,7 +22,7 @@ if (!accessToken) {
     .then(res => res.json())
     .then(user => {
         // Spørg bot API om rolle
-        fetch(`https://DIN_BOT_URL/checkrole?userId=${user.id}`)
+        fetch(`http://217.160.125.125:14370/checkrole?userId=${user.id}`)
         .then(res => res.json())
         .then(data => {
             if(data.hasRole){
