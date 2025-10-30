@@ -1,4 +1,4 @@
-/* style.css */
+/* Grundlæggende body */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #1e1e2f;
@@ -7,26 +7,29 @@ body {
   padding: 0;
 }
 
-h1 {
+/* Overskrifter */
+h1, h2 {
   text-align: center;
-  margin-top: 20px;
-  font-size: 2.2em;
+  margin: 20px 0;
   color: #7289da;
 }
 
+/* Profilkort */
 #profile {
   background-color: #2f3136;
-  width: 400px;
-  margin: 30px auto;
+  width: 350px;
+  margin: 20px auto;
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
   text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 #profile img {
   border-radius: 50%;
   border: 3px solid #7289da;
+  width: 120px;
+  height: 120px;
   margin-bottom: 15px;
 }
 
@@ -35,83 +38,54 @@ h1 {
   font-size: 1.1em;
 }
 
-#admin-section {
-  background-color: #2f3136;
-  width: 90%;
-  max-width: 800px;
-  margin: 30px auto;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-button {
+/* Admin-knap */
+#admin-btn {
+  display: block;
+  margin: 15px auto 0 auto;
+  padding: 10px 20px;
   background-color: #7289da;
-  border: none;
-  padding: 10px 15px;
   color: #fff;
-  border-radius: 5px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
   cursor: pointer;
-  margin: 5px;
-  transition: 0.2s;
+  transition: background 0.2s;
 }
 
-button:hover {
+#admin-btn:hover {
   background-color: #5b6eae;
 }
 
-input, select, textarea {
-  padding: 8px;
-  border-radius: 5px;
-  border: none;
+/* Brugerliste */
+#user-list {
   width: 90%;
-  margin: 5px 0;
+  max-width: 800px;
+  margin: 20px auto;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-table, th, td {
-  border: 1px solid #444;
-}
-
-th, td {
-  padding: 10px;
-  text-align: left;
-}
-
-th {
-  background-color: #7289da;
-  color: #fff;
-}
-
-td {
-  background-color: #3a3b45;
-}
-
-
-
-.user-card, .admin-user-card {
+.user-card {
   background-color: #2f3136;
-  margin: 10px auto;
-  padding: 10px;
+  padding: 15px;
   border-radius: 10px;
-  width: 90%;
-  max-width: 600px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+/* Knapper i brugerlisten/admin */
 button {
   background-color: #7289da;
-  color: #fff;
   border: none;
-  padding: 5px 10px;
-  margin-left: 10px;
+  color: #fff;
+  padding: 6px 12px;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 0.9em;
+  transition: 0.2s;
 }
+
 button:hover {
   background-color: #5b6eae;
 }
