@@ -1,4 +1,4 @@
-/* Grundlæggende */
+/* Grundlæggende body */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #1e1e2f;
@@ -21,6 +21,7 @@ body {
 #sidebar h2 {
   text-align: center;
   color: #7289da;
+  margin-bottom: 20px;
 }
 
 #sidebar button {
@@ -68,12 +69,8 @@ body {
   margin-bottom: 10px;
 }
 
-#user-list {
-  width: 100%;
-  max-width: 800px;
-}
-
-.user-card {
+/* Brugerliste / admin brugerpanel */
+.user-card, .admin-user-card {
   background-color: #2f3136;
   padding: 15px;
   margin-bottom: 10px;
@@ -81,6 +78,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  max-width: 800px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
@@ -89,7 +88,7 @@ button {
   background-color: #7289da;
   border: none;
   color: #fff;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 5px;
   cursor: pointer;
   transition: 0.2s;
@@ -99,10 +98,27 @@ button:hover {
   background-color: #5b6eae;
 }
 
+/* Inputs, selects og textarea */
 input, select, textarea {
   border-radius: 5px;
   border: none;
   padding: 6px;
   width: 100%;
   margin: 5px 0;
+  background-color: #3a3b45;
+  color: #fff;
+}
+
+/* Offentlige beskeder */
+#messages-list div {
+  background-color: #3a3b45;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+/* Overskrifter */
+h1, h2 {
+  color: #7289da;
+  margin: 15px 0;
 }
