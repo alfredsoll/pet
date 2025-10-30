@@ -6,134 +6,72 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div id="sidebar">
   <h2>PET Dashboard</h2>
-  <button onclick="showSection('profile')">Min Profil</button>
-  <button onclick="showSection('users')">Brugere</button>
-  <button onclick="showSection('messages')">Beskeder</button>
-  <button id="admin-btn" style="display:none;" onclick="goToAdmin()">Admin Panel</button>
+  <button onclick="goAdmin()">Admin Panel</button>
 </div>
 
 <div id="main">
-  <!-- Profil -->
-  <div id="profile-section">
-    <div id="profile">
-      <img id="avatar" src="" alt="Avatar">
-      <p>Brugernavn: <span id="username"></span></p>
-      <p>Afdeling: <span id="department"></span></p>
-      <p>Rolle: <span id="role"></span></p>
-      <p>Admin: <span id="admin"></span></p>
-    </div>
+  <div id="profile" class="card">
+    <img id="avatar" src="" alt="Avatar">
+    <p>Brugernavn: <span id="username"></span></p>
+    <p>Afdeling: <span id="department"></span></p>
+    <p>Rolle: <span id="role"></span></p>
+    <p>Admin: <span id="admin"></span></p>
   </div>
 
-
-    <!-- Offentlige beskeder -->
   <div id="messages-section" class="card">
     <h2>Offentlige Beskeder</h2>
     <div id="messages-list"></div>
   </div>
 </div>
 
-  <!-- Brugerliste -->
-  <div id="users-section" style="display:none;">
-    <h2>Brugere</h2>
-    <div id="user-list"></div>
-  </div>
-
-  <!-- Offentlige beskeder -->
-  <div id="messages-section" style="display:none;">
-    <h2>Offentlige Beskeder</h2>
-    <div id="messages-list"></div>
-    <textarea id="new-message" placeholder="Skriv ny besked..."></textarea>
-    <button onclick="postMessage()">Send Besked</button>
-  </div>
-</div>
-
 <script>
-async function init() {
+let messages = []; // Kan deles med admin i memory
+
+async function initDashboard() {
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   const token = params.get("access_token");
-  if (!token) {
-    alert("Du skal logge ind med Discord!");
-    window.location.href = "index.html";
-    return;
-  }
+  if(!token){ alert("Log ind med Discord!"); window.location.href="index.html"; return; }
 
-  const userResponse = await fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const userResponse = await fetch("https://discord.com/api/users/@me",{ headers:{ Authorization:`Bearer ${token}` }});
   const userData = await userResponse.json();
 
-  const whitelistResponse = await fetch("users.json");
-  const whitelist = await whitelistResponse.json();
+  const whitelistResp = await fetch("users.json");
+  const whitelist = await whitelistResp.json();
 
   const userInfo = whitelist[userData.id];
-  if (!userInfo) {
-    window.location.href = "noaccess.html";
-    return;
-  }
+  if(!userInfo){ alert("Ingen adgang!"); window.location.href="index.html"; return; }
 
-  // Profil info
-  document.getElementById("username").innerText = userInfo.username;
-  document.getElementById("department").innerText = userInfo.department;
-  document.getElementById("role").innerText = userInfo.role;
-  document.getElementById("admin").innerText = userInfo.admin ? "Ja" : "Nej";
+  // Udfyld profil
   document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+  document.getElementById("username").textContent = userData.username;
+  document.getElementById("department").textContent = userInfo.department;
+  document.getElementById("role").textContent = userInfo.role;
+  document.getElementById("admin").textContent = userInfo.admin ? "Ja" : "Nej";
 
-  if (userInfo.admin) document.getElementById("admin-btn").style.display = "block";
-
-  // Brugerliste
-  const userListDiv = document.getElementById("user-list");
-  for (const [id, info] of Object.entries(whitelist)) {
-    const div = document.createElement("div");
-    div.className = "user-card";
-    div.innerHTML = `<span>${info.username} - ${info.department} (${info.role})</span>`;
-    userListDiv.appendChild(div);
-  }
-
-  window.currentUser = userInfo;
-}
-
-// Sidebar funktion
-function showSection(section) {
-  document.getElementById("profile-section").style.display = (section==='profile') ? 'block' : 'none';
-  document.getElementById("users-section").style.display = (section==='users') ? 'block' : 'none';
-  document.getElementById("messages-section").style.display = (section==='messages') ? 'block' : 'none';
-}
-
-// Admin panel-knap
-function goToAdmin() {
-  const hash = window.location.hash;
-  window.location.href = `admin.html${hash}`;
-}
-
-// Offentlig besked
-let messages = [];
-function postMessage() {
-  const msg = document.getElementById("new-message").value;
-  if(msg.trim()==="") return;
-  messages.push(msg);
-  document.getElementById("new-message").value="";
+  messages = userInfo.messages || [];
   renderMessages();
 }
-function renderMessages() {
+
+function renderMessages(){
   const list = document.getElementById("messages-list");
-  list.innerHTML = "";
-  messages.forEach(msg => {
-    const div = document.createElement("div");
+  list.innerHTML="";
+  messages.forEach(msg=>{
+    const div=document.createElement("div");
     div.textContent = msg;
-    div.style.backgroundColor = "#3a3b45";
-    div.style.padding = "8px";
-    div.style.borderRadius = "5px";
-    div.style.marginBottom = "5px";
     list.appendChild(div);
   });
 }
 
-init();
-</script>
+function goAdmin(){
+  const hash = window.location.hash;
+  const token = hash;
+  window.location.href = `admin.html${token}`;
+}
 
+initDashboard();
+</script>
 </body>
 </html>
