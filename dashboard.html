@@ -6,75 +6,76 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Velkommen til PET Dashboard</h1>
+<h1>Velkommen til PET Dashboard</h1>
 
-  <div id="profile">
-    <img id="avatar" src="" alt="Avatar" width="100">
-    <p>Brugernavn: <span id="username"></span></p>
-    <p>Afdeling: <span id="department"></span></p>
-    <p>Admin: <span id="admin"></span></p>
-    <button id="admin-btn" style="display:none;" onclick="goToAdmin()">Admin Panel</button>
-  </div>
+<div id="profile">
+  <img id="avatar" src="" alt="Avatar">
+  <p>Brugernavn: <span id="username"></span></p>
+  <p>Afdeling: <span id="department"></span></p>
+  <p>Rolle: <span id="role"></span></p>
+  <p>Admin: <span id="admin"></span></p>
+  <button id="admin-btn" style="display:none;" onclick="goToAdmin()">Admin Panel</button>
+</div>
 
-  <h2>Brugere</h2>
-  <div id="user-list"></div>
+<h2>Brugere</h2>
+<div id="user-list"></div>
 
-  <script>
-    async function init() {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const token = params.get("access_token");
+<script>
+async function init() {
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const token = params.get("access_token");
 
-      if (!token) {
-        alert("Du skal logge ind med Discord!");
-        window.location.href = "index.html";
-        return;
-      }
+  if (!token) {
+    alert("Du skal logge ind med Discord!");
+    window.location.href = "index.html";
+    return;
+  }
 
-      const userResponse = await fetch("https://discord.com/api/users/@me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const userData = await userResponse.json();
+  const userResponse = await fetch("https://discord.com/api/users/@me", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const userData = await userResponse.json();
 
-      const whitelistResponse = await fetch("users.json");
-      const whitelist = await whitelistResponse.json();
+  const whitelistResponse = await fetch("users.json");
+  const whitelist = await whitelistResponse.json();
 
-      const userInfo = whitelist[userData.id];
-      if (!userInfo) {
-        window.location.href = "noaccess.html";
-        return;
-      }
+  const userInfo = whitelist[userData.id];
+  if (!userInfo) {
+    window.location.href = "noaccess.html";
+    return;
+  }
 
-      // Vis brugerprofil
-      document.getElementById("username").innerText = userInfo.username;
-      document.getElementById("department").innerText = userInfo.department;
-      document.getElementById("role").innerText = userInfo.role;
-      document.getElementById("admin").innerText = userInfo.admin ? "Ja" : "Nej";
-      document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+  // Profil info
+  document.getElementById("username").innerText = userInfo.username;
+  document.getElementById("department").innerText = userInfo.department;
+  document.getElementById("role").innerText = userInfo.role;
+  document.getElementById("admin").innerText = userInfo.admin ? "Ja" : "Nej";
+  document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
 
+  // Admin-knap
+  if (userInfo.admin) {
+    document.getElementById("admin-btn").style.display = "block";
+  }
 
-      // Admin-knap
-      if (userInfo.admin) {
-        document.getElementById("admin-btn").style.display = "block";
-      }
+  // Brugerlisten
+  const userListDiv = document.getElementById("user-list");
+  for (const [id, info] of Object.entries(whitelist)) {
+    const div = document.createElement("div");
+    div.className = "user-card";
+    div.innerHTML = `<span>${info.username} - ${info.department} (${info.role})</span>`;
+    userListDiv.appendChild(div);
+  }
 
-      // Vis alle brugere med badges
-      const userListDiv = document.getElementById("user-list");
-      for (const [id, info] of Object.entries(whitelist)) {
-        const div = document.createElement("div");
-        div.className = "user-card";
-        div.innerHTML = `<strong>${info.username}</strong> ${info.department} (${info.role})`;
-        userListDiv.appendChild(div);
-      }
+  window.currentUser = userInfo;
+}
 
-      window.currentUser = userInfo;
-    }
+function goToAdmin() {
+  const hash = window.location.hash;
+  window.location.href = `admin.html${hash}`;
+}
 
-    function goToAdmin() {
-      window.location.href = "admin.html";
-    }
-
-    init();
-  </script>
+init();
+</script>
 </body>
 </html>
