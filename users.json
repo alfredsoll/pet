@@ -1,0 +1,14 @@
+{
+  "1000572209238114454": {
+    "username": "AlfredSoll",
+    "department": "Ledelsen",
+    "role": "Pet Chef",
+    "admin": true
+  },
+  "123456789012345678": {
+    "username": "TestUser",
+    "department": "Analyse",
+    "role": "Agent",
+    "admin": false
+  }
+}
