@@ -7,18 +7,17 @@
 </head>
 <body>
   <h1>Velkommen til PET Dashboard</h1>
+
   <div id="profile">
     <img id="avatar" src="" alt="Avatar" width="100">
     <p>Brugernavn: <span id="username"></span></p>
     <p>Afdeling: <span id="department"></span></p>
-    <p>Rolle: <span id="role"></span></p>
     <p>Admin: <span id="admin"></span></p>
+    <button id="admin-btn" style="display:none;" onclick="goToAdmin()">Admin Panel</button>
   </div>
 
-  <div id="admin-section" style="display:none;">
-    <h2>Admin-sektion</h2>
-    <p>Her kan du styre avancerede funktioner...</p>
-  </div>
+  <h2>Brugere</h2>
+  <div id="user-list"></div>
 
   <script>
     async function init() {
@@ -32,13 +31,11 @@
         return;
       }
 
-      // Hent brugerdata fra Discord
       const userResponse = await fetch("https://discord.com/api/users/@me", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const userData = await userResponse.json();
 
-      // Hent whitelist JSON
       const whitelistResponse = await fetch("users.json");
       const whitelist = await whitelistResponse.json();
 
@@ -48,17 +45,33 @@
         return;
       }
 
-      // Vis brugerdata
+      // Vis brugerprofil
       document.getElementById("username").innerText = userInfo.username;
       document.getElementById("department").innerText = userInfo.department;
       document.getElementById("role").innerText = userInfo.role;
       document.getElementById("admin").innerText = userInfo.admin ? "Ja" : "Nej";
       document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
 
-      // Admin-sektion
+
+      // Admin-knap
       if (userInfo.admin) {
-        document.getElementById("admin-section").style.display = "block";
+        document.getElementById("admin-btn").style.display = "block";
       }
+
+      // Vis alle brugere med badges
+      const userListDiv = document.getElementById("user-list");
+      for (const [id, info] of Object.entries(whitelist)) {
+        const div = document.createElement("div");
+        div.className = "user-card";
+        div.innerHTML = `<strong>${info.username}</strong> ${info.department} (${info.role})`;
+        userListDiv.appendChild(div);
+      }
+
+      window.currentUser = userInfo;
+    }
+
+    function goToAdmin() {
+      window.location.href = "admin.html";
     }
 
     init();
