@@ -2,46 +2,66 @@
 <html lang="da">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PET Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container" id="userInfo">Henter brugerdata...</div>
+  <h1>Velkommen til PET Dashboard</h1>
+  <div id="profile">
+    <img id="avatar" src="" alt="Avatar" width="100">
+    <p>Brugernavn: <span id="username"></span></p>
+    <p>Afdeling: <span id="department"></span></p>
+    <p>Rolle: <span id="role"></span></p>
+    <p>Admin: <span id="admin"></span></p>
+  </div>
 
-<script>
-const fragment = new URLSearchParams(window.location.hash.slice(1));
-const accessToken = fragment.get("access_token");
+  <div id="admin-section" style="display:none;">
+    <h2>Admin-sektion</h2>
+    <p>Her kan du styre avancerede funktioner...</p>
+  </div>
 
-if (!accessToken) {
-    window.location.href = "index.html";
-} else {
-    fetch("https://discord.com/api/users/@me", {
-        headers: { Authorization: `Bearer ${accessToken}` }
-    })
-    .then(res => res.json())
-    .then(user => {
-        // Spørg bot API om rolle
-        fetch(`https://pet-proxy-o7sn2pcx6-alfredsolls-projects.vercel.app/api/checkrole?userId=${user.id}`)
-        .then(res => res.json())
-        .then(data => {
-            if(data.hasRole){
-                document.getElementById("userInfo").innerHTML = `
-                    <h2>Velkommen, ${user.username}#${user.discriminator}</h2>
-                    <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" width="100" style="border-radius:50%">
-                    <p>Rank: ${data.rank}</p>
-                    <button onclick="logout()">Log ud</button>
-                `;
-            } else {
-                window.location.href = "noaccess.html";
-            }
-        });
-    });
-}
+  <script>
+    async function init() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const token = params.get("access_token");
 
-function logout(){
-    window.location.href = "index.html";
-}
-</script>
+      if (!token) {
+        alert("Du skal logge ind med Discord!");
+        window.location.href = "index.html";
+        return;
+      }
+
+      // Hent brugerdata fra Discord
+      const userResponse = await fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const userData = await userResponse.json();
+
+      // Hent whitelist JSON
+      const whitelistResponse = await fetch("users.json");
+      const whitelist = await whitelistResponse.json();
+
+      const userInfo = whitelist[userData.id];
+      if (!userInfo) {
+        window.location.href = "noaccess.html";
+        return;
+      }
+
+      // Vis brugerdata
+      document.getElementById("username").innerText = userInfo.username;
+      document.getElementById("department").innerText = userInfo.department;
+      document.getElementById("role").innerText = userInfo.role;
+      document.getElementById("admin").innerText = userInfo.admin ? "Ja" : "Nej";
+      document.getElementById("avatar").src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+
+      // Admin-sektion
+      if (userInfo.admin) {
+        document.getElementById("admin-section").style.display = "block";
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
