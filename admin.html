@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<title>PET Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>PET Admin Panel</h1>
+  <div id="admin-content"></div>
+
+  <script>
+    async function initAdmin() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const token = params.get("access_token");
+
+      if (!token) {
+        alert("Du skal logge ind med Discord!");
+        window.location.href = "index.html";
+        return;
+      }
+
+      const userResponse = await fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const userData = await userResponse.json();
+
+      const whitelistResponse = await fetch("users.json");
+      const whitelist = await whitelistResponse.json();
+
+      const userInfo = whitelist[userData.id];
+      if (!userInfo || !userInfo.admin) {
+        alert("Du har ikke admin-adgang!");
+        window.location.href = "dashboard.html#" + token;
+        return;
+      }
+
+      const adminDiv = document.getElementById("admin-content");
+
+      // Liste af brugere med edit-knapper
+      for (const [id, info] of Object.entries(whitelist)) {
+        const div = document.createElement("div");
+        div.className = "admin-user-card";
+        div.innerHTML = `
+          <strong>${info.username}</strong> - ${info.department} (${info.role}) Admin: ${info.admin} <br>
+          <button onclick="removeUser('${id}')">Fjern bruger</button>
+        `;
+        adminDiv.appendChild(div);
+      }
+
+      window.whitelist = whitelist;
+    }
+
+    function removeUser(userId) {
+      if(confirm("Er du sikker på, du vil fjerne brugeren?")) {
+        delete window.whitelist[userId];
+        alert("Bruger fjernet. Husk at gemme JSON manuelt.");
+        location.reload();
+      }
+    }
+
+    initAdmin();
+  </script>
+</body>
+</html>
