@@ -6,69 +6,59 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div id="sidebar">
   <h2>Admin Panel</h2>
   <button onclick="showSection('users')">Brugere</button>
   <button onclick="showSection('messages')">Offentlige Beskeder</button>
+  <button onclick="backToDashboard()">Tilbage til Dashboard</button>
 </div>
 
 <div id="main">
-  <div id="users-section">
-    <h2>Brugere</h2>
-    <div id="user-list"></div>
-  </div>
-
-  <div id="messages-section" style="display:none;">
+  <div id="messages-section" class="card" style="display:none;">
     <h2>Offentlige Beskeder</h2>
     <div id="messages-list"></div>
     <textarea id="new-message" placeholder="Skriv ny besked..."></textarea>
     <button onclick="postMessage()">Send Besked</button>
   </div>
+
+  <div id="users-section" class="card">
+    <h2>Brugere</h2>
+    <div id="user-list"></div>
+  </div>
 </div>
 
 <script>
 let messages = [];
-
-async function initAdmin() {
+async function initAdmin(){
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   const token = params.get("access_token");
-  if (!token) {
-    alert("Du skal logge ind med Discord!");
-    window.location.href = "index.html";
-    return;
-  }
+  if(!token){ alert("Log ind med Discord!"); window.location.href="index.html"; return; }
 
-  const userResponse = await fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const userResponse = await fetch("https://discord.com/api/users/@me",{ headers:{ Authorization:`Bearer ${token}` }});
   const userData = await userResponse.json();
 
-  const whitelistResponse = await fetch("users.json");
-  const whitelist = await whitelistResponse.json();
+  const whitelistResp = await fetch("users.json");
+  const whitelist = await whitelistResp.json();
 
   const userInfo = whitelist[userData.id];
-  if (!userInfo || !userInfo.admin) {
-    alert("Du har ikke admin-adgang!");
-    window.location.href = "dashboard.html#" + token;
-    return;
-  }
+  if(!userInfo || !userInfo.admin){ alert("Ingen admin-adgang!"); window.location.href="dashboard.html"+hash; return; }
 
   window.whitelist = whitelist;
-
+  messages = userInfo.messages || [];
   renderUsers();
   renderMessages();
 }
 
-// Render brugerliste med ændring af rolle/admin
-function renderUsers() {
+function backToDashboard(){ window.location.href=`dashboard.html${window.location.hash}`; }
+
+function renderUsers(){
   const userListDiv = document.getElementById("user-list");
-  userListDiv.innerHTML = "";
-  for (const [id, info] of Object.entries(window.whitelist)) {
-    const div = document.createElement("div");
-    div.className = "admin-user-card";
-    div.innerHTML = `
+  userListDiv.innerHTML="";
+  for(const [id,info] of Object.entries(window.whitelist)){
+    const div=document.createElement("div");
+    div.className="admin-user-card";
+    div.innerHTML=`
       <div>
         <strong>${info.username}</strong><br>
         Afdeling: <input value="${info.department}" id="dep-${id}">
@@ -87,27 +77,20 @@ function renderUsers() {
   }
 }
 
-function updateUser(id) {
+function updateUser(id){
   const dep = document.getElementById(`dep-${id}`).value;
   const role = document.getElementById(`role-${id}`).value;
-  const admin = document.getElementById(`admin-${id}`).value === "true";
-  window.whitelist[id].department = dep;
-  window.whitelist[id].role = role;
-  window.whitelist[id].admin = admin;
-  alert("Bruger opdateret. Husk at gemme JSON manuelt!");
+  const admin = document.getElementById(`admin-${id}`).value==="true";
+  window.whitelist[id].department=dep;
+  window.whitelist[id].role=role;
+  window.whitelist[id].admin=admin;
+  alert("Bruger opdateret. Gem JSON manuelt!");
   renderUsers();
 }
 
-function removeUser(id) {
-  if(confirm("Er du sikker på du vil fjerne brugeren?")) {
-    delete window.whitelist[id];
-    alert("Bruger fjernet. Husk at gemme JSON manuelt!");
-    renderUsers();
-  }
-}
+function removeUser(id){ if(confirm("Er du sikker?")){ delete window.whitelist[id]; alert("Bruger fjernet."); renderUsers(); } }
 
-// Offentlige beskeder
-function postMessage() {
+function postMessage(){
   const msg = document.getElementById("new-message").value;
   if(msg.trim()==="") return;
   messages.push(msg);
@@ -115,20 +98,15 @@ function postMessage() {
   renderMessages();
 }
 
-function renderMessages() {
+function renderMessages(){
   const list = document.getElementById("messages-list");
   list.innerHTML="";
-  messages.forEach(msg=>{
-    const div = document.createElement("div");
-    div.textContent = msg;
-    list.appendChild(div);
-  });
+  messages.forEach(msg=>{ const div=document.createElement("div"); div.textContent=msg; list.appendChild(div); });
 }
 
-// Sidebar navigation
-function showSection(section) {
-  document.getElementById("users-section").style.display = (section==='users') ? 'block' : 'none';
-  document.getElementById("messages-section").style.display = (section==='messages') ? 'block' : 'none';
+function showSection(section){
+  document.getElementById("users-section").style.display = (section==='users') ? 'block':'none';
+  document.getElementById("messages-section").style.display = (section==='messages') ? 'block':'none';
 }
 
 initAdmin();
