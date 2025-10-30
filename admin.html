@@ -6,61 +6,132 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>PET Admin Panel</h1>
-  <div id="admin-content"></div>
 
-  <script>
-    async function initAdmin() {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const token = params.get("access_token");
+<div id="sidebar">
+  <h2>Admin Panel</h2>
+  <button onclick="showSection('users')">Brugere</button>
+  <button onclick="showSection('messages')">Offentlige Beskeder</button>
+</div>
 
-      if (!token) {
-        alert("Du skal logge ind med Discord!");
-        window.location.href = "index.html";
-        return;
-      }
+<div id="main">
+  <div id="users-section">
+    <h2>Brugere</h2>
+    <div id="user-list"></div>
+  </div>
 
-      const userResponse = await fetch("https://discord.com/api/users/@me", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const userData = await userResponse.json();
+  <div id="messages-section" style="display:none;">
+    <h2>Offentlige Beskeder</h2>
+    <div id="messages-list"></div>
+    <textarea id="new-message" placeholder="Skriv ny besked..."></textarea>
+    <button onclick="postMessage()">Send Besked</button>
+  </div>
+</div>
 
-      const whitelistResponse = await fetch("users.json");
-      const whitelist = await whitelistResponse.json();
+<script>
+let messages = [];
 
-      const userInfo = whitelist[userData.id];
-      if (!userInfo || !userInfo.admin) {
-        alert("Du har ikke admin-adgang!");
-        window.location.href = "dashboard.html#" + token;
-        return;
-      }
+async function initAdmin() {
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const token = params.get("access_token");
+  if (!token) {
+    alert("Du skal logge ind med Discord!");
+    window.location.href = "index.html";
+    return;
+  }
 
-      const adminDiv = document.getElementById("admin-content");
+  const userResponse = await fetch("https://discord.com/api/users/@me", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const userData = await userResponse.json();
 
-      // Liste af brugere med edit-knapper
-      for (const [id, info] of Object.entries(whitelist)) {
-        const div = document.createElement("div");
-        div.className = "admin-user-card";
-        div.innerHTML = `
-          <strong>${info.username}</strong> - ${info.department} (${info.role}) Admin: ${info.admin} <br>
-          <button onclick="removeUser('${id}')">Fjern bruger</button>
-        `;
-        adminDiv.appendChild(div);
-      }
+  const whitelistResponse = await fetch("users.json");
+  const whitelist = await whitelistResponse.json();
 
-      window.whitelist = whitelist;
-    }
+  const userInfo = whitelist[userData.id];
+  if (!userInfo || !userInfo.admin) {
+    alert("Du har ikke admin-adgang!");
+    window.location.href = "dashboard.html#" + token;
+    return;
+  }
 
-    function removeUser(userId) {
-      if(confirm("Er du sikker på, du vil fjerne brugeren?")) {
-        delete window.whitelist[userId];
-        alert("Bruger fjernet. Husk at gemme JSON manuelt.");
-        location.reload();
-      }
-    }
+  window.whitelist = whitelist;
 
-    initAdmin();
-  </script>
+  renderUsers();
+  renderMessages();
+}
+
+// Render brugerliste med ændring af rolle/admin
+function renderUsers() {
+  const userListDiv = document.getElementById("user-list");
+  userListDiv.innerHTML = "";
+  for (const [id, info] of Object.entries(window.whitelist)) {
+    const div = document.createElement("div");
+    div.className = "admin-user-card";
+    div.innerHTML = `
+      <div>
+        <strong>${info.username}</strong><br>
+        Afdeling: <input value="${info.department}" id="dep-${id}">
+        Rolle: <input value="${info.role}" id="role-${id}">
+        Admin: <select id="admin-${id}">
+          <option value="true" ${info.admin?"selected":""}>Ja</option>
+          <option value="false" ${!info.admin?"selected":""}>Nej</option>
+        </select>
+      </div>
+      <div>
+        <button onclick="updateUser('${id}')">Opdater</button>
+        <button onclick="removeUser('${id}')">Fjern</button>
+      </div>
+    `;
+    userListDiv.appendChild(div);
+  }
+}
+
+function updateUser(id) {
+  const dep = document.getElementById(`dep-${id}`).value;
+  const role = document.getElementById(`role-${id}`).value;
+  const admin = document.getElementById(`admin-${id}`).value === "true";
+  window.whitelist[id].department = dep;
+  window.whitelist[id].role = role;
+  window.whitelist[id].admin = admin;
+  alert("Bruger opdateret. Husk at gemme JSON manuelt!");
+  renderUsers();
+}
+
+function removeUser(id) {
+  if(confirm("Er du sikker på du vil fjerne brugeren?")) {
+    delete window.whitelist[id];
+    alert("Bruger fjernet. Husk at gemme JSON manuelt!");
+    renderUsers();
+  }
+}
+
+// Offentlige beskeder
+function postMessage() {
+  const msg = document.getElementById("new-message").value;
+  if(msg.trim()==="") return;
+  messages.push(msg);
+  document.getElementById("new-message").value="";
+  renderMessages();
+}
+
+function renderMessages() {
+  const list = document.getElementById("messages-list");
+  list.innerHTML="";
+  messages.forEach(msg=>{
+    const div = document.createElement("div");
+    div.textContent = msg;
+    list.appendChild(div);
+  });
+}
+
+// Sidebar navigation
+function showSection(section) {
+  document.getElementById("users-section").style.display = (section==='users') ? 'block' : 'none';
+  document.getElementById("messages-section").style.display = (section==='messages') ? 'block' : 'none';
+}
+
+initAdmin();
+</script>
 </body>
 </html>
